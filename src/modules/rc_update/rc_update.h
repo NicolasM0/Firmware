@@ -149,7 +149,14 @@ private:
 								because these parameters are never read. */
 	} _parameter_handles{};
 
-	uORB::SubscriptionCallbackWorkItem _input_rc_sub{this, ORB_ID(input_rc)};
+	static constexpr int MAX_INPUT_RC = 4;
+
+	uORB::SubscriptionCallbackWorkItem _input_rc_subs[MAX_INPUT_RC] {
+		{this, ORB_ID(input_rc), 0},
+		{this, ORB_ID(input_rc), 1},
+		{this, ORB_ID(input_rc), 2},
+		{this, ORB_ID(input_rc), 3}
+	};
 
 	uORB::Subscription	_parameter_update_sub{ORB_ID(parameter_update)};	/**< notification of parameter updates */
 	uORB::Subscription	_rc_parameter_map_sub{ORB_ID(rc_parameter_map)};	/**< rc parameter map subscription */
@@ -226,7 +233,10 @@ private:
 		(ParamFloat<px4::params::RC_FLT_SMP_RATE>) _param_rc_flt_smp_rate,
 		(ParamFloat<px4::params::RC_FLT_CUTOFF>) _param_rc_flt_cutoff,
 
-		(ParamInt<px4::params::RC_CHAN_CNT>) _param_rc_chan_cnt
+		(ParamInt<px4::params::RC_CHAN_CNT>) _param_rc_chan_cnt,
+
+		(ParamInt<px4::params::COM_RC_MTPL_IN>) _param_com_rc_multiple_inputs,
+		(ParamFloat<px4::params::COM_RC_LOSS_T>) _param_com_rc_loss_t /**< time at which commander considers RC lost */
 	)
 
 };

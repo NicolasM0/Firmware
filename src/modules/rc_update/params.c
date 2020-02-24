@@ -2251,3 +2251,20 @@ PARAM_DEFINE_FLOAT(RC_FLT_SMP_RATE, 50.0f);
  * @group Radio Calibration
  */
 PARAM_DEFINE_FLOAT(RC_FLT_CUTOFF, 10.0f);
+
+/**
+ * Use multiple RC inputs
+ *
+ * The default value of 0 allow RC command only from the first provider.
+ * Setting this to 1 allows RC commands from any provider to be used.
+ * Warning, in this case, if radio control is lost and RC commands are recived via mavlink (see COM_RC_IN_MODE),
+ * RC lost fail safe will not be triggered.
+ * Warning: all rc inputs must have the same channels mapping
+ *
+ * @group Commander
+ * @min 0
+ * @max 1
+ * @value 0 Use only first input
+ * @value 1 Use the last recived command
+ */
+PARAM_DEFINE_INT32(COM_RC_MTPL_IN, 0);

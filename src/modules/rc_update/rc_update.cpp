@@ -95,9 +95,11 @@ RCUpdate::~RCUpdate()
 bool
 RCUpdate::init()
 {
-	if (!_input_rc_sub.registerCallback()) {
-		PX4_ERR("input_rc callback registration failed!");
-		return false;
+	for (int i = 0; i < MAX_INPUT_RC; i++) {
+		if (!_input_rc_subs[i].registerCallback()) {
+			PX4_ERR("input_rc callback registration failed!");
+			return false;
+		}
 	}
 
 	return true;
@@ -318,7 +320,10 @@ void
 RCUpdate::Run()
 {
 	if (should_exit()) {
-		_input_rc_sub.unregisterCallback();
+		for (int i = 0; i < MAX_INPUT_RC; i++) {
+			_input_rc_subs[i].unregisterCallback();
+		}
+
 		exit_and_cleanup();
 		return;
 	}
@@ -338,10 +343,27 @@ RCUpdate::Run()
 
 	rc_parameter_map_poll();
 
-	/* read low-level values from FMU or IO RC inputs (PPM, Spektrum, S.Bus) */
 	input_rc_s rc_input;
+	bool input_rc_copy_ok = false;
 
-	if (_input_rc_sub.copy(&rc_input)) {
+	if (_param_com_rc_multiple_inputs.get() == 0) {
+		/* read low-level values from FMU or IO RC inputs (PPM, Spektrum, S.Bus) */
+		input_rc_copy_ok = _input_rc_subs[0].copy(&rc_input);
+
+	} else {
+		/* find the instance that triggered the callback and check if it should be used */
+		for (uint i = 0; i < MAX_INPUT_RC; i++) {
+			input_rc_s rc_input_tmp;
+
+			if (_input_rc_subs[i].copy(&rc_input_tmp) && (!input_rc_copy_ok
+					|| rc_input.timestamp_last_signal + _param_com_rc_loss_t.get() * 1_s < rc_input_tmp.timestamp_last_signal)) {
+				rc_input = rc_input_tmp;
+				input_rc_copy_ok = true;
+			}
+		}
+	}
+
+	if (input_rc_copy_ok) {
 
 		/* detect RC signal loss */
 		bool signal_lost = true;
