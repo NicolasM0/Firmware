@@ -215,11 +215,31 @@ RCUpdate::set_params_from_rc(const ParameterHandles &parameter_handles)
 void
 RCUpdate::rc_poll(const ParameterHandles &parameter_handles)
 {
-	if (_rc_sub.updated()) {
-		/* read low-level values from FMU or IO RC inputs (PPM, Spektrum, S.Bus) */
-		input_rc_s rc_input{};
-		_rc_sub.copy(&rc_input);
 
+	/* read low-level values from FMU or IO RC inputs (PPM, Spektrum, S.Bus) */
+	// read all input_rc instances and take lastest
+	input_rc_s rc_input{};
+	bool input_rc_copy_ok = false;
+
+	for (int i = 0; i < MAX_INPUT_RC; i++) {
+		if (!input_rc_copy_ok) {
+			if (_rc_sub[i].updated()) {
+				input_rc_copy_ok = _rc_sub[i].copy(&rc_input);
+			}
+
+		} else {
+			input_rc_s rc_input_tmp;
+
+			if (_rc_sub[i].updated()) {
+				_rc_sub[i].copy(&rc_input_tmp);
+				if (rc_input_tmp.timestamp_last_signal > rc_input.timestamp_last_signal) {
+					rc_input = rc_input_tmp;
+				}
+			}
+		}
+	}
+
+	if (input_rc_copy_ok) {
 		/* detect RC signal loss */
 		bool signal_lost;
 

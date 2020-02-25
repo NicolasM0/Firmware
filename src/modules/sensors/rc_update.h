@@ -105,8 +105,13 @@ private:
 	 */
 	void set_params_from_rc(const ParameterHandles &parameter_handles);
 
+	static constexpr int MAX_INPUT_RC = 3;
 
-	uORB::Subscription	_rc_sub{ORB_ID(input_rc)};				/**< raw rc channels data subscription */
+	uORB::Subscription	_rc_sub[MAX_INPUT_RC] {				/**< raw rc channels data subscription */
+		{ORB_ID(input_rc), 0},
+		{ORB_ID(input_rc), 1},
+		{ORB_ID(input_rc), 2}
+	};
 	uORB::Subscription	_rc_parameter_map_sub{ORB_ID(rc_parameter_map)};	/**< rc parameter map subscription */
 
 	uORB::Publication<rc_channels_s>	_rc_pub{ORB_ID(rc_channels)};				/**< raw r/c control topic */
