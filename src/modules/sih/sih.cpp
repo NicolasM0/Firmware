@@ -241,7 +241,7 @@ void Sih::init_variables()
 void Sih::init_sensors()
 {
 	_vehicle_gps_pos.fix_type = 3;  // 3D fix
-	_vehicle_gps_pos.satellites_used = 8;
+	_vehicle_gps_pos.satellites_used = 10;
 	_vehicle_gps_pos.heading = NAN;
 	_vehicle_gps_pos.heading_offset = NAN;
 	_vehicle_gps_pos.s_variance_m_s = 0.5f;
