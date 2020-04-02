@@ -51,7 +51,7 @@ logger status
 pwm_out_sim status
 sensors status
 commander status
-rc_update stop
+rc_update status
 land_detector status
 navigator status
 ekf2 status
